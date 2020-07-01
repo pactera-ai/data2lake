@@ -1,0 +1,59 @@
+version: 0.2
+
+#env:
+  #variables:
+     # key: "value"
+     # key: "value"
+  #parameter-store:
+     # key: "value"
+     # key: "value"
+  #secrets-manager:
+     # key: secret-id:json-key:version-stage:version-id
+     # key: secret-id:json-key:version-stage:version-id
+  #exported-variables:
+     # - variable
+     # - variable
+  #git-credential-helper: yes
+
+phases:
+  install:
+    #If you use the Ubuntu standard image 2.0 or later, you must specify runtime-versions.
+    #If you specify runtime-versions and use an image other than Ubuntu standard image 2.0, the build fails.
+    runtime-versions:
+       python: 3.x
+      # name: version
+    commands:
+      - apt-get update -y
+      - apt-get install -y postgresql-client
+      # - command
+  #pre_build:
+    #commands:
+      # - command
+      # - command
+  build:
+    commands:
+      - PGPASSWORD=pactera123 psql --host "database-1.c3bzva2lxu4d.ap-northeast-1.rds.amazonaws.com" --port "5432" --username "postgres" -c 'create database dvdrental'
+      - ls
+      - PGPASSWORD=pactera123 pg_restore --host "database-1.c3bzva2lxu4d.ap-northeast-1.rds.amazonaws.com" --port "5432" --username "postgres" --dbname "dvdrental" --verbose "dvdrental.tar"
+  #post_build:
+    #commands:
+      # - command
+      # - command
+#reports:
+  #report-name-or-arn:
+    #files:
+      # - location
+      # - location
+    #base-directory: location
+    #discard-paths: yes
+    #file-format: JunitXml | CucumberJson
+#artifacts:
+  #files:
+    # - location
+    # - location
+  #name: $(date +%Y-%m-%d)
+  #discard-paths: yes
+  #base-directory: location
+#cache:
+  #paths:
+    # - paths
