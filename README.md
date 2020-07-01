@@ -1,4 +1,4 @@
-#data2lake
+# data2lake
 CDK to enable you to connect to your specified data source and automatically create your data lake on AWS. It includes a CDK with an instance of a stack (`DatalakeStack`) which contains an Amazon SQS queue that is subscribed to an Amazon SNS topic.
 
 The process goes something like this:
@@ -20,21 +20,21 @@ The process goes something like this:
 - [Building](#building)
 - [Provider Specific Documentation](#provider-specific-documentation)
 
-##requirements
+## requirements
 
-##install
+## install
 
-##dependency-setup
+## dependency-setup
 
-##usage
+## usage
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 
-##example
+## example
 
-##advanced-configuration
+## advanced-configuration
 
-##building
+## building
 ### Useful commands
 
  * `npm run build`   compile typescript to js
@@ -44,4 +44,4 @@ The `cdk.json` file tells the CDK Toolkit how to execute your app.
  * `cdk diff`        compare deployed stack with current state
  * `cdk synth`       emits the synthesized CloudFormation template
 
-##provider-specific-documentation
+## provider-specific-documentation
