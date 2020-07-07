@@ -23,6 +23,8 @@ The process goes something like this:
 ## requirements
 
 ## install
+### CDK install
+   Please refer to AWS CDK workshop at https://cdkworkshop.com/15-prerequisites.html
 
 ## dependency-setup
 
