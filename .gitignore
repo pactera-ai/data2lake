@@ -2,3 +2,6 @@
 cdk.out/
 initDb/
 node_modules/
+*.d.ts
+bin/*.js
+lib/*.js

@@ -4,7 +4,6 @@ import { Bucket } from "@aws-cdk/aws-s3";
 import * as iam from '@aws-cdk/aws-iam';
 import { ServicePrincipal } from "@aws-cdk/aws-iam";
 import { Vpc, SubnetType, SecurityGroup } from "@aws-cdk/aws-ec2";
-import { SourceDB } from "./db-stack";
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from "@aws-cdk/custom-resources";
 
 export interface DmsProps {
@@ -16,7 +15,6 @@ export interface SourceProps {
     serverName: string,
     username: string,
     password: string,
-    sourceDB: SourceDB 
 }
 export class DMS extends Construct {
     public readonly rawBucket: Bucket;
@@ -25,7 +23,7 @@ export class DMS extends Construct {
         const sourceEndpoint: CfnEndpoint = new CfnEndpoint(this, 'Source', {
             endpointType: 'source',
             engineName: 'postgres',
-            databaseName: 'dvdrental',
+            databaseName: 'postgres',
             password: props.source.password,
             port: props.source.port,
             serverName: props.source.serverName,
@@ -58,7 +56,7 @@ export class DMS extends Construct {
         const dmsSecurityGroup = new SecurityGroup(this, 'DmsSecurityGroup', {
             vpc: props.vpc
         });
-        props.source.sourceDB.sourceDB.connections.allowDefaultPortFrom(dmsSecurityGroup);
+
         const instance: CfnReplicationInstance = new CfnReplicationInstance(this, 'DmsInstance', {
             replicationInstanceClass: 'dms.t2.micro',
             allocatedStorage: 10,
