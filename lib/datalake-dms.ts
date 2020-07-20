@@ -15,6 +15,8 @@ export interface SourceProps {
     serverName: string,
     username: string,
     password: string,
+    engineName: string,
+    databaseName: string
 }
 export class DMS extends Construct {
     public readonly rawBucket: Bucket;
@@ -22,8 +24,8 @@ export class DMS extends Construct {
         super(scope, id);
         const sourceEndpoint: CfnEndpoint = new CfnEndpoint(this, 'Source', {
             endpointType: 'source',
-            engineName: 'postgres',
-            databaseName: 'postgres',
+            engineName: props.source.engineName,
+            databaseName: props.source.databaseName,
             password: props.source.password,
             port: props.source.port,
             serverName: props.source.serverName,
@@ -93,6 +95,7 @@ export class DMS extends Construct {
     }
 
     private getMappingRule(): Object {
+        const config = require('../config/config.json');
         return {
             "rules": [
               {
@@ -100,8 +103,8 @@ export class DMS extends Construct {
                 "rule-id": "1",
                 "rule-name": "1",
                 "object-locator": {
-                  "schema-name": "public",
-                  "table-name": "%"
+                  "schema-name": config.schemaName,
+                  "table-name": config.tableName
                 },
                 "rule-action": "include",
                 "filters": []

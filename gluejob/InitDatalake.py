@@ -30,7 +30,9 @@ args = getResolvedOptions(sys.argv, [
         'datalake_bucket',
         'datalake_prefix',
         'region',
-        'controller_table_name'
+        'controller_table_name',
+        'primaryKey',
+        'partitionKey'
         ])
 job.init(args['JOB_NAME'], args)
 
@@ -108,8 +110,8 @@ class InitialLoad():
                 'bucket': {'S':self.bucket},
                 'prefix': {'S':self.prefix},
                 'folder': {'S':folder},
-                'PrimaryKey': {'S': folder[:-1] + '_id'},
-                'PartitionKey': {'S':'null'},
+                'PrimaryKey': args['primaryKey'],
+                'PartitionKey': args['partitionKey'],
                 'needIndexFile': {'S': 'null'},
                 'LastFullLoadDate': {'S':'1900-01-01 00:00:00'},
                 'LastIncrementalFile': {'S':path + '0.parquet'},

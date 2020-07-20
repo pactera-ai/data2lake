@@ -60,6 +60,7 @@ export class GlueJob extends Construct {
         incrementalJobScript.grantRead(glueRole);
         controllerTable.grantFullAccess(glueRole);
 
+        const config = require('../config/config.json');
         const initGlueJob = new CfnJob(this, 'InitDatalakeJob', {
             role: glueRole.roleArn,
             allocatedCapacity: 2,
@@ -73,7 +74,9 @@ export class GlueJob extends Construct {
                 '--datalake_bucket': datalakeBucket.bucketName,
                 '--datalake_prefix': 'datalake/',
                 '--region': Stack.of(this).region,
-                '--controller_table_name': controllerTable.tableName
+                '--controller_table_name': controllerTable.tableName,
+                '--primaryKey': config.primaryKey,
+                '--partitionKey': config.partitionKey
             },
             command: {
                 name: 'glueetl',
