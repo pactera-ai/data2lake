@@ -1,6 +1,6 @@
 import { Construct, RemovalPolicy } from "@aws-cdk/core";
 import {CfnEndpoint, CfnReplicationInstance, CfnReplicationSubnetGroup, CfnReplicationTask} from "@aws-cdk/aws-dms"
-import { Bucket } from "@aws-cdk/aws-s3";
+import { Bucket, LifecycleRule } from "@aws-cdk/aws-s3";
 import * as iam from '@aws-cdk/aws-iam';
 import { ServicePrincipal } from "@aws-cdk/aws-iam";
 import { Vpc, SubnetType, SecurityGroup } from "@aws-cdk/aws-ec2";
@@ -9,6 +9,7 @@ import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from "
 export interface DmsProps {
     source: SourceProps;
     vpc: Vpc;
+    s3LifecycleRule?: LifecycleRule[];
 } 
 export interface SourceProps {
     port: number,
@@ -32,7 +33,8 @@ export class DMS extends Construct {
             username: props.source.username
         });
         this.rawBucket = new Bucket(this, 'RawBucket', {
-            removalPolicy: RemovalPolicy.DESTROY
+            removalPolicy: RemovalPolicy.DESTROY,
+            lifecycleRules: props.s3LifecycleRule
         });
         
         const dmsTargetRole = new iam.Role(this, 'dmsTargetRole', {

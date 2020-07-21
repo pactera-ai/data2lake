@@ -2,6 +2,7 @@ import * as cdk from '@aws-cdk/core';
 import * as ec2 from '@aws-cdk/aws-ec2'
 import { DMS } from './datalake-dms';
 import { GlueJob } from './datalake-gluejob';
+import { LifecycleRule } from "@aws-cdk/aws-s3";
 
 const config = require("../config/config.json");
 
@@ -24,7 +25,8 @@ export class DatalakeStack extends cdk.Stack {
         serverName: config.serverName,
         engineName: config.engineName,
         databaseName: config.databaseName
-      }
+      },
+      s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
 
     const rawBucket = dms.rawBucket;
@@ -33,4 +35,22 @@ export class DatalakeStack extends cdk.Stack {
     });
   }
  
+}
+
+
+function parseLifecycleRule(json: Array<any>): any[] {
+  let rules: any[] = [];
+
+  json.forEach( (obj) => {
+    let rule: any;
+    rule = obj;
+    if (obj.expiration) {
+      rule.expiration = cdk.Duration.days(obj.expiration);
+    }
+    if (obj.abortIncompleteMultipartUploadAfter) {
+      rule.abortIncompleteMultipartUploadAfter = cdk.Duration.days(obj.abortIncompleteMultipartUploadAfter);
+    }
+    rules.push(rule);
+  })
+  return rules;
 }
