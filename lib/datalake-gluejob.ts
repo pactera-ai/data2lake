@@ -9,6 +9,7 @@ import * as asset from '@aws-cdk/aws-s3-assets'
 import * as path from 'path';
 export interface GlueJobProps {
     rawBucket: Bucket;
+    schemaName: string;
 }
 export class GlueJob extends Construct {
     private readonly incrementalJobName: string = 'IncrementalDatalakeJob';
@@ -43,7 +44,8 @@ export class GlueJob extends Construct {
                         path: 's3://' + datalakeBucket.bucketName + '/datalake/'
                     }
                 ]
-            }
+            },
+            name: 'DatalakeCrawler'
         });
 
         const initDatalakeScript = new asset.Asset(this, 'initDatalakeScript', {
@@ -69,7 +71,7 @@ export class GlueJob extends Construct {
             },
             glueVersion: '1.0',
             defaultArguments: {
-                '--prefix': 'public/',
+                '--prefix': props.schemaName + '/',
                 '--bucket': props.rawBucket.bucketName,
                 '--datalake_bucket': datalakeBucket.bucketName,
                 '--datalake_prefix': 'datalake/',
@@ -95,7 +97,7 @@ export class GlueJob extends Construct {
             },
             glueVersion: '1.0',
             defaultArguments: {
-                '--prefix': 'public/',
+                '--prefix': props.schemaName + '/',
                 '--bucket': props.rawBucket.bucketName,
                 '--datalake_bucket': datalakeBucket.bucketName,
                 '--datalake_prefix': 'datalake/',

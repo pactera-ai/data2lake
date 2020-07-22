@@ -17,8 +17,6 @@
     "schemaName_comment": "name of the schema where the data stored",
     "tableName": "%",
     "tableName_comment": "name of the table where the data stored",
-    "primaryKey": "{'S': folder[:-1] + '_id'}",
-    "partitionKey": "{'S':'null'}",
     "s3LifecycleRule": [{
         "enabled": true,
         "expiration": 10,

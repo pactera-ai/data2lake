@@ -31,7 +31,8 @@ export class DatalakeStack extends cdk.Stack {
 
     const rawBucket = dms.rawBucket;
     new GlueJob(this, 'DatalakeGlueJob', {
-      rawBucket
+      rawBucket: rawBucket,
+      schemaName: config.schemaName
     });
   }
  
