@@ -3,6 +3,8 @@ import * as ec2 from '@aws-cdk/aws-ec2'
 import { DMS } from './datalake-dms';
 import { GlueJob } from './datalake-gluejob';
 import { LifecycleRule } from "@aws-cdk/aws-s3";
+import * as sns from '@aws-cdk/aws-sns';
+import * as subs from '@aws-cdk/aws-sns-subscriptions';
 
 const config = require("../config/config.json");
 
@@ -34,6 +36,13 @@ export class DatalakeStack extends cdk.Stack {
       rawBucket: rawBucket,
       schemaName: config.schemaName
     });
+
+    const topic = new sns.Topic(this, 'datalake_topic', {
+      displayName: 'DataLake Subscription Topic'
+    });
+
+    topic.addSubscription(new subs.EmailSubscription("steveguo1024@gmail.com"));
+
   }
  
 }

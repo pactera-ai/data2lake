@@ -30,9 +30,7 @@ args = getResolvedOptions(sys.argv, [
         'datalake_bucket',
         'datalake_prefix',
         'region',
-        'controller_table_name',
-        'primaryKey',
-        'partitionKey'
+        'controller_table_name'
         ])
 job.init(args['JOB_NAME'], args)
 
