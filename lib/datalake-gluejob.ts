@@ -54,11 +54,7 @@ export class GlueJob extends Construct {
         const incrementalJobScript = new asset.Asset(this, 'incrementalJobScript', {
             path: path.join(__dirname, '..', 'gluejob', 'LoadIncremental.py')
         });
-        const incrementalGlueScript = new asset.Asset(this, 'incrementalDatalakeScript', {
-            path: path.join(__dirname, '..', 'gluejob', 'LoadIncremental.py')
-          });
         initDatalakeScript.grantRead(glueRole);
-        incrementalGlueScript.grantRead(glueRole);
         incrementalJobScript.grantRead(glueRole);
         controllerTable.grantFullAccess(glueRole);
 
