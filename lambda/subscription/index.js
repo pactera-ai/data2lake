@@ -15,7 +15,7 @@ exports.handler = function(input, context) {
                 Message: '[ERROR] - ' + msg,
                 Subject: 'ERROR DETECTED',
                 // TargetArn: 'STRING_VALUE',
-                TopicArn: 'arn:aws:sns:us-west-2:193793567275:DatalakeStack-datalaketopic72ABF921-1M25ADJTIRICW'
+                TopicArn: process.env.TOPIC_ARN
             };
             sns.publish(sns_params, function(err, data) {
                 if (err) console.log(err, err.stack); // an error occurred
