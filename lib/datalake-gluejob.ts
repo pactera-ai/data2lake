@@ -7,9 +7,11 @@ import { ServicePrincipal, PolicyStatement } from "@aws-cdk/aws-iam";
 import { Bucket } from "@aws-cdk/aws-s3";
 import * as asset from '@aws-cdk/aws-s3-assets'
 import * as path from 'path';
+import { LogGroup } from "@aws-cdk/aws-logs";
 export interface GlueJobProps {
     rawBucket: Bucket;
     schemaName: string;
+    logGroup: LogGroup;
 }
 export class GlueJob extends Construct {
     private readonly incrementalJobName: string = 'IncrementalDatalakeJob';
@@ -74,7 +76,9 @@ export class GlueJob extends Construct {
                 '--region': Stack.of(this).region,
                 '--controller_table_name': controllerTable.tableName,
                 '--primaryKey': config.primaryKey,
-                '--partitionKey': config.partitionKey
+                '--partitionKey': config.partitionKey,
+                '--enable-continuous-cloudwatch-log': true,
+                '--continuous-log-logGroup': props.logGroup.logGroupName
             },
             command: {
                 name: 'glueetl',
@@ -100,7 +104,9 @@ export class GlueJob extends Construct {
                 '--id_prefix': 'index/',
                 '--region': Stack.of(this).region,
                 '--controller_table_name': controllerTable.tableName,
-                '--crawler_name': crawler.name
+                '--crawler_name': crawler.name,
+                '--enable-continuous-cloudwatch-log': true,
+                '--continuous-log-logGroup': props.logGroup.logGroupName
             },
             command: {
                 name: 'glueetl',

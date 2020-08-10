@@ -2,16 +2,16 @@ import { Construct } from "@aws-cdk/core";
 import * as sns from '@aws-cdk/aws-sns';
 import * as subs from '@aws-cdk/aws-sns-subscriptions';
 import * as lambda from '@aws-cdk/aws-lambda';
-import { SubscriptionFilter, FilterPattern } from '@aws-cdk/aws-logs';
+import { SubscriptionFilter, FilterPattern, LogGroup } from '@aws-cdk/aws-logs';
 import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
 import * as iam from '@aws-cdk/aws-iam';
 import { ServicePrincipal, ManagedPolicy } from "@aws-cdk/aws-iam";
 import * as path from 'path';
-import MyLogGroup from './myLogGroup';
 
 export interface SubscriptionProps {
     emailSubscriptionList: string[],
-    smsSubscriptionList: string[]
+    smsSubscriptionList: string[],
+    logGroup: LogGroup
 } 
 /**
  * Subscribe error log from DMS and Glue jobs 
@@ -55,12 +55,9 @@ export class Subscription extends Construct {
         
         //Monitoring logs in the given log group, when pattern detected, trigger destination function
         new SubscriptionFilter(this, 'subscriptionFilter', {
-            logGroup: new MyLogGroup(
-                'arn:aws:logs:us-west-2:193793567275:log-group:/aws-glue/jobs/error:*', 
-                '/aws-glue/jobs/error'
-            ),
+            logGroup: props.logGroup,
             destination: new LambdaDestination(subscriptionFn),
-            filterPattern: FilterPattern.allTerms("Traceback")
+            filterPattern: FilterPattern.allTerms("Final app status: FAILED")
         });
     }
 }

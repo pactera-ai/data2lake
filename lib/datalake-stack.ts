@@ -3,6 +3,7 @@ import * as ec2 from '@aws-cdk/aws-ec2'
 import { DMS } from './datalake-dms';
 import { GlueJob } from './datalake-gluejob';
 import { Subscription } from './datalake-subscription';
+import { LogGroup } from '@aws-cdk/aws-logs';
 
 const config = require("../config/config.json");
 
@@ -29,15 +30,21 @@ export class DatalakeStack extends cdk.Stack {
       s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
 
+    const glueLogGroup = new LogGroup(this, 'GlueLogGroup', {
+      logGroupName: "/aws-glue/jobs/custom-log"
+    })
+
     const rawBucket = dms.rawBucket;
     new GlueJob(this, 'DatalakeGlueJob', {
       rawBucket: rawBucket,
-      schemaName: config.schemaName
+      schemaName: config.schemaName,
+      logGroup: glueLogGroup
     });
 
     new Subscription(this, 'Subscription', {
       emailSubscriptionList: config.emailSubscriptionList,
-      smsSubscriptionList: config.smsSubscriptionList
+      smsSubscriptionList: config.smsSubscriptionList,
+      logGroup: glueLogGroup
     });
   }
  
