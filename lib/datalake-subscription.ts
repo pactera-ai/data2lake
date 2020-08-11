@@ -5,6 +5,7 @@ import { Rule } from '@aws-cdk/aws-events';
 import MyPattern from './MyEventPattern';
 import { GlueJob } from "./datalake-gluejob";
 import {SnsTopic} from '@aws-cdk/aws-events-targets';
+import { CfnEventSubscription } from '@aws-cdk/aws-dms';
 
 export interface SubscriptionProps {
     emailSubscriptionList: string[],
@@ -40,6 +41,13 @@ export class Subscription extends Construct {
                 }
             }),
             targets: [new SnsTopic(topic)]
+        })
+
+        new CfnEventSubscription(this, 'DMSEventSubsciption', {
+            snsTopicArn: topic.topicArn,
+            enabled: true,
+            sourceType: 'replication-task',
+            eventCategories: ['failure']
         })
     }
 }
