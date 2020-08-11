@@ -11,10 +11,10 @@ import { LogGroup } from "@aws-cdk/aws-logs";
 export interface GlueJobProps {
     rawBucket: Bucket;
     schemaName: string;
-    logGroup: LogGroup;
 }
 export class GlueJob extends Construct {
-    private readonly incrementalJobName: string = 'IncrementalDatalakeJob';
+    public readonly initialJobName: string = 'InitialDatalakeJob';
+    public readonly incrementalJobName: string = 'IncrementalDatalakeJob';
     constructor(scope: Construct, id: string, props: GlueJobProps) {
         super(scope, id);
         const controllerTable = new dynamodb.Table(this, 'ControllerTable', {
@@ -62,6 +62,7 @@ export class GlueJob extends Construct {
 
         const config = require('../config/config.json');
         const initGlueJob = new CfnJob(this, 'InitDatalakeJob', {
+            name: this.initialJobName,
             role: glueRole.roleArn,
             allocatedCapacity: 2,
             executionProperty: {
@@ -76,9 +77,7 @@ export class GlueJob extends Construct {
                 '--region': Stack.of(this).region,
                 '--controller_table_name': controllerTable.tableName,
                 '--primaryKey': config.primaryKey,
-                '--partitionKey': config.partitionKey,
-                '--enable-continuous-cloudwatch-log': true,
-                '--continuous-log-logGroup': props.logGroup.logGroupName
+                '--partitionKey': config.partitionKey
             },
             command: {
                 name: 'glueetl',
@@ -104,9 +103,7 @@ export class GlueJob extends Construct {
                 '--id_prefix': 'index/',
                 '--region': Stack.of(this).region,
                 '--controller_table_name': controllerTable.tableName,
-                '--crawler_name': crawler.name,
-                '--enable-continuous-cloudwatch-log': true,
-                '--continuous-log-logGroup': props.logGroup.logGroupName
+                '--crawler_name': crawler.name
             },
             command: {
                 name: 'glueetl',

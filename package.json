@@ -26,6 +26,8 @@
     "@aws-cdk/aws-dms": "^1.38.0",
     "@aws-cdk/aws-dynamodb": "^1.38.0",
     "@aws-cdk/aws-ec2": "^1.38.0",
+    "@aws-cdk/aws-events": "^1.38.0",
+    "@aws-cdk/aws-events-targets": "^1.38.0",
     "@aws-cdk/aws-glue": "^1.38.0",
     "@aws-cdk/aws-iam": "^1.38.0",
     "@aws-cdk/aws-lambda": "^1.38.0",

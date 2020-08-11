@@ -1,17 +1,15 @@
 import { Construct } from "@aws-cdk/core";
 import * as sns from '@aws-cdk/aws-sns';
 import * as subs from '@aws-cdk/aws-sns-subscriptions';
-import * as lambda from '@aws-cdk/aws-lambda';
-import { SubscriptionFilter, FilterPattern, LogGroup } from '@aws-cdk/aws-logs';
-import { LambdaDestination } from '@aws-cdk/aws-logs-destinations';
-import * as iam from '@aws-cdk/aws-iam';
-import { ServicePrincipal, ManagedPolicy } from "@aws-cdk/aws-iam";
-import * as path from 'path';
+import { Rule } from '@aws-cdk/aws-events';
+import MyPattern from './MyEventPattern';
+import { GlueJob } from "./datalake-gluejob";
+import {SnsTopic} from '@aws-cdk/aws-events-targets';
 
 export interface SubscriptionProps {
     emailSubscriptionList: string[],
     smsSubscriptionList: string[],
-    logGroup: LogGroup
+    glueJob: GlueJob
 } 
 /**
  * Subscribe error log from DMS and Glue jobs 
@@ -32,32 +30,16 @@ export class Subscription extends Construct {
             topic.addSubscription(new subs.SmsSubscription(phone));
         }
 
-        const lambdaExecutionRole = new iam.Role(this, 'lambdaExecutionRole', {
-            assumedBy: new ServicePrincipal('lambda.amazonaws.com'),    
-            managedPolicies: [
-                ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSLambdaBasicExecutionRole'),
-                ManagedPolicy.fromAwsManagedPolicyName('AmazonSNSFullAccess')
-            ]
-        });
-        /**
-         * Subscription Filter below will send the error log to this lambda function, and the function
-         * will trigger SNS.
-         */
-        const subscriptionFn = new lambda.Function(this, 'subscriptionFn', {
-            runtime: lambda.Runtime.NODEJS_10_X,
-            handler: 'index.handler',
-            code: lambda.Code.fromAsset(path.join(__dirname, '..', 'lambda', 'subscription')),
-            role: lambdaExecutionRole,
-            environment: {
-                TOPIC_ARN: topic.topicArn
-            }
-        });
-        
-        //Monitoring logs in the given log group, when pattern detected, trigger destination function
-        new SubscriptionFilter(this, 'subscriptionFilter', {
-            logGroup: props.logGroup,
-            destination: new LambdaDestination(subscriptionFn),
-            filterPattern: FilterPattern.allTerms("Final app status: FAILED")
-        });
+        const glueEvent = new Rule(this, 'GlueEvent', {
+            eventPattern: new MyPattern(this, 'GlueEventPattern', {
+                source: ["aws.glue"],
+                detailType: ["Glue Job State Change"],
+                detail: {
+                    "jobName": [props.glueJob.initialJobName, props.glueJob.incrementalJobName],
+                    "state": ["FAILED"]
+                }
+            }),
+            targets: [new SnsTopic(topic)]
+        })
     }
 }

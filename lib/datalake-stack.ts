@@ -30,21 +30,16 @@ export class DatalakeStack extends cdk.Stack {
       s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
 
-    const glueLogGroup = new LogGroup(this, 'GlueLogGroup', {
-      logGroupName: "/aws-glue/jobs/custom-log"
-    })
-
     const rawBucket = dms.rawBucket;
-    new GlueJob(this, 'DatalakeGlueJob', {
+    const glueJob = new GlueJob(this, 'DatalakeGlueJob', {
       rawBucket: rawBucket,
-      schemaName: config.schemaName,
-      logGroup: glueLogGroup
+      schemaName: config.schemaName
     });
 
     new Subscription(this, 'Subscription', {
       emailSubscriptionList: config.emailSubscriptionList,
       smsSubscriptionList: config.smsSubscriptionList,
-      logGroup: glueLogGroup
+      glueJob: glueJob
     });
   }
  

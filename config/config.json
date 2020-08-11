@@ -26,8 +26,7 @@
     "s3LifecycleRule_comment": "Raw S3 bucket lifecycle rule. ",
     "emailSubscriptionList": [
         "steveguo1024@gmail.com",
-        "steve.guo@pactera.com",
-        "knight.bi@pactera.com"
+        "steve.guo@pactera.com"
     ],
     "smsSubscriptionList": [
         "+61421986234"
