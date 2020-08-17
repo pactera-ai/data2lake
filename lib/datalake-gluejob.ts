@@ -3,11 +3,12 @@ import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as glue from '@aws-cdk/aws-glue'
 import { CfnCrawler, CfnJob, CfnTrigger } from "@aws-cdk/aws-glue";
 import * as iam from '@aws-cdk/aws-iam';
-import { ServicePrincipal, PolicyStatement } from "@aws-cdk/aws-iam";
+import { ServicePrincipal, PolicyStatement, ManagedPolicy } from "@aws-cdk/aws-iam";
 import { Bucket } from "@aws-cdk/aws-s3";
 import * as asset from '@aws-cdk/aws-s3-assets'
 import * as path from 'path';
-import { LogGroup } from "@aws-cdk/aws-logs";
+import * as lakeformation from '@aws-cdk/aws-lakeformation';
+
 export interface GlueJobProps {
     rawBucket: Bucket;
     schemaName: string;
@@ -29,13 +30,12 @@ export class GlueJob extends Construct {
             removalPolicy: RemovalPolicy.DESTROY
         });
         const glueRole = new iam.Role(this, 'glueRole', {
-            assumedBy: new ServicePrincipal('glue.amazonaws.com')
+            assumedBy: new ServicePrincipal('glue.amazonaws.com'),
+            managedPolicies: [ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSGlueServiceRole')]
         });
         props.rawBucket.grantRead(glueRole);
         datalakeBucket.grantReadWrite(glueRole);
-        glueRole.addManagedPolicy({
-            managedPolicyArn: 'arn:aws:iam::aws:policy/service-role/AWSGlueServiceRole'
-        })
+        
         const crawler = new CfnCrawler(this, 'Crawler', {
             role: glueRole.roleArn,
             configuration: "{\"Version\":1.0,\"CrawlerOutput\":{\"Partitions\":{\"AddOrUpdateBehavior\":\"InheritFromTable\"},\"Tables\":{\"AddOrUpdateBehavior\":\"MergeNewColumns\"}}}",

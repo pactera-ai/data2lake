@@ -3,7 +3,8 @@ import * as ec2 from '@aws-cdk/aws-ec2'
 import { DMS } from './datalake-dms';
 import { GlueJob } from './datalake-gluejob';
 import { Subscription } from './datalake-subscription';
-import { LogGroup } from '@aws-cdk/aws-logs';
+import { CfnDataLakeSettings } from '@aws-cdk/aws-lakeformation';
+import { MyPrinciple } from './MyPrinciple';
 
 const config = require("../config/config.json");
 
@@ -29,6 +30,12 @@ export class DatalakeStack extends cdk.Stack {
       },
       s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
+
+    new CfnDataLakeSettings(this, 'DataLakeSetting', {
+      admins: [ new MyPrinciple(this, 'MyPrinciple', {
+        dataLakePrincipalIdentifier: config.executiveArn
+      }) ]
+    })
 
     const rawBucket = dms.rawBucket;
     const glueJob = new GlueJob(this, 'DatalakeGlueJob', {

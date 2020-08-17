@@ -30,5 +30,7 @@
     ],
     "smsSubscriptionList": [
         "+61421986234"
-    ]
+    ],
+    "executiveArn": "arn:aws:iam::193793567275:user/steve.guo",
+    "executiveArn_comment": "The arn of the IAM user who would create the CloudFormation stack, that is, the arn of the secret key and access token."
 }
