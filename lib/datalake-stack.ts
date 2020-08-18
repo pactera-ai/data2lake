@@ -31,7 +31,7 @@ export class DatalakeStack extends cdk.Stack {
       s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
 
-    new CfnDataLakeSettings(this, 'DataLakeSetting', {
+    const datalakeSettings = new CfnDataLakeSettings(this, 'DataLakeSetting', {
       admins: [ new MyPrinciple(this, 'MyPrinciple', {
         dataLakePrincipalIdentifier: config.executiveArn
       }) ]
@@ -40,7 +40,8 @@ export class DatalakeStack extends cdk.Stack {
     const rawBucket = dms.rawBucket;
     const glueJob = new GlueJob(this, 'DatalakeGlueJob', {
       rawBucket: rawBucket,
-      schemaName: config.schemaName
+      schemaName: config.schemaName,
+      dependsOn: datalakeSettings
     });
 
     new Subscription(this, 'Subscription', {

@@ -43,13 +43,6 @@ job.init(args['JOB_NAME'], args)
 
 class LoadIncremental():
     def __init__(self):
-        # self.prefix = 'dms-rawdata/public/'
-        # self.bucket = 'dms-rawdata'
-        # self.datalake_bucket='marketboomer-datalake-table'
-        # # Prod
-        # self.datalake_prefix='datalake/'
-        # self.id_prefix = 'index/'
-        # self.ddbTableName = 'DMSCDC_Controller'
         self.prefix = args['prefix']
         self.bucket = args['bucket']
         self.datalake_bucket = args['datalake_bucket']
@@ -57,10 +50,6 @@ class LoadIncremental():
         self.id_prefix = args['id_prefix']
         self.ddbTableName = args['controller_table_name']
         region = args['region']
-        # Dev
-        # self.datalake_prefix='datalake-dev/'
-        # self.id_prefix = 'index-dev/'
-        # self.ddbTableName = 'DMSCDC_Controller-dev'
         self.s3conn = boto3.client('s3', region)
         self.ddbconn = boto3.client('dynamodb', region)
 

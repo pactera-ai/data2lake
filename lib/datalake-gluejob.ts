@@ -1,17 +1,17 @@
-import { Construct, RemovalPolicy, Stack } from "@aws-cdk/core";
+import { Construct, RemovalPolicy, Stack, CfnResource } from "@aws-cdk/core";
 import * as dynamodb from '@aws-cdk/aws-dynamodb';
 import * as glue from '@aws-cdk/aws-glue'
 import { CfnCrawler, CfnJob, CfnTrigger } from "@aws-cdk/aws-glue";
 import * as iam from '@aws-cdk/aws-iam';
-import { ServicePrincipal, PolicyStatement, ManagedPolicy } from "@aws-cdk/aws-iam";
+import { ServicePrincipal, ManagedPolicy } from "@aws-cdk/aws-iam";
 import { Bucket } from "@aws-cdk/aws-s3";
 import * as asset from '@aws-cdk/aws-s3-assets'
 import * as path from 'path';
-import * as lakeformation from '@aws-cdk/aws-lakeformation';
 
 export interface GlueJobProps {
     rawBucket: Bucket;
     schemaName: string;
+    dependsOn?: CfnResource;
 }
 export class GlueJob extends Construct {
     public readonly initialJobName: string = 'InitialDatalakeJob';
@@ -26,6 +26,11 @@ export class GlueJob extends Construct {
         const database = new glue.Database(this, 'Datalake-glue-database', {
             databaseName: 'datalake'
         });
+        
+        if (props.dependsOn) {
+            database.node.addDependency(props.dependsOn);
+        }
+
         const datalakeBucket = new Bucket(this, 'Datalake-bucket', {
             removalPolicy: RemovalPolicy.DESTROY
         });

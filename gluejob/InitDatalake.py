@@ -50,15 +50,6 @@ class InitialLoad():
         self.s3conn = boto3.client('s3', region)
         self.ddbconn = boto3.client('dynamodb', region)
 
-        # self.prefix = 'public/'
-        # self.bucket = 'dms-rawdata'
-        # self.datalake_bucket='marketboomer-datalake-table'
-        # self.datalake_prefix='datalake/'
-        # self.index_prefix = 'index/'
-        # self.s3conn = boto3.client('s3', 'ap-southeast-1')
-        # self.ddbconn = boto3.client('dynamodb', 'ap-southeast-1')
-        # self.ddbTableName = 'DMSCDC_Controller'
-
     def load_index_file(self, input_partitioned, folder, partitionKeys, primaryKey):
         s3_index_path = 's3://' + self.datalake_bucket + '/' + self.index_prefix + folder
         input_partitioned.select(primaryKey, *partitionKeys).coalesce(1).write.mode('overwrite').parquet(s3_index_path)
