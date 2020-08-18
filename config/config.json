@@ -13,10 +13,22 @@
     "engineName_comment": "engine type of the source db. E.G. postgress, mysql",
     "databaseName": "pcr_gvg",
     "databaseName_comment": "database name that the source data stored. DMS will only migrate the data in this database.",
-    "schemaName": "pcr_gvg",
-    "schemaName_comment": "name of the schema where the data stored",
-    "tableName": "%",
-    "tableName_comment": "name of the table where the data stored",
+    "table_list": [
+        {
+            "schemaName": "pcr_gvg",
+            "schemaName_comment": "name of the schema where the data stored",
+            "tableName": "student",
+            "tableName_comment": "name of the table where the data stored"
+        },
+        {
+            "schemaName": "pcr_gvg",
+            "tableName": "Member"
+        },
+        {
+            "schemaName": "new_schema",
+            "tableName": "%"
+        }
+    ],
     "s3LifecycleRule": [{
         "enabled": true,
         "expiration": 10,

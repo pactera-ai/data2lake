@@ -98,21 +98,38 @@ export class DMS extends Construct {
 
     private getMappingRule(): Object {
         const config = require('../config/config.json');
-        return {
-            "rules": [
-              {
+        var mappingRules: { rules: object[] } = { rules: [] };
+        for (let i =0; i<config.table_list.length; i++) {
+            let rule: object = 
+            {
                 "rule-type": "selection",
-                "rule-id": "1",
-                "rule-name": "1",
+                "rule-id": i,
+                "rule-name": i,
                 "object-locator": {
-                  "schema-name": config.schemaName,
-                  "table-name": config.tableName
+                    "schema-name": config.table_list[i].schemaName,
+                    "table-name": config.table_list[i].tableName
                 },
                 "rule-action": "include",
                 "filters": []
-              }
-            ]
-          };
+            }
+            mappingRules.rules.push(rule);
+        }
+        return mappingRules;
+        // return {
+        //     "rules": [
+        //       {
+        //         "rule-type": "selection",
+        //         "rule-id": "1",
+        //         "rule-name": "1",
+        //         "object-locator": {
+        //           "schema-name": config.schemaName,
+        //           "table-name": config.tableName
+        //         },
+        //         "rule-action": "include",
+        //         "filters": []
+        //       }
+        //     ]
+        //   };
           
     }
     private getTaskSetting(): Object {
