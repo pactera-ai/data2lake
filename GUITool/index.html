@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta property="og:title" content="title">
+    <meta property="og:image" content="image">
+    <meta property="og:url" content="url">
+    <meta property="og:type" content="article">
+    <meta property="og:description" content="description">
+    <link rel="icon" href="">
+    <!-- Add this to <head> -->
+    <!-- Load required Bootstrap and BootstrapVue CSS -->
+    <link type="text/css" rel="stylesheet" href="http://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
+    <link type="text/css" rel="stylesheet" href="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
+
+    <!-- Load polyfills to support older browsers -->
+    <script src="http://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
+
+    <!-- Load Vue followed by BootstrapVue -->
+    <script src="http://unpkg.com/vue@latest/dist/vue.min.js"></script>
+    <script src="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
+
+    <!-- Load the following for BootstrapVueIcons support -->
+    <script src="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
+
+    <title>Data2Lake</title>
+</head>
+<body>
+<div id="app">
+    <b-navbar toggleable="lg" type="dark" variant="info" sticky=true>
+        <b-navbar-brand href="#">Data2Lake</b-navbar-brand>
+      
+        <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
+      
+        <b-collapse id="nav-collapse" is-nav>
+        <b-navbar-nav>
+            <b-nav-item href="#">Data Connection</b-nav-item>
+            <b-nav-item href="#">Tables</b-nav-item>
+            <b-nav-item href="#">Subscriptions</b-nav-item>
+            <b-nav-item href="#">Others</b-nav-item>
+        </b-navbar-nav>
+        </b-collapse>
+    </b-navbar>
+    <div class="container" style="background-color: rgb(255, 255, 255); max-width: none; width: 90%; padding-bottom: 20px;">
+        <b-form @reset="onReset" @submit.prevent="onSubmit">
+        <h2 style=" padding-top: 20px">Database Connection</h2>
+        <hr>
+        <!-- server name -->
+        <b-form-group
+          id="input-group-1"
+          label="Server Name:"
+          label-for="input-1"
+          label-class="font-weight-bold"
+          :description="config.serverName_comment"
+        >
+            <b-form-input
+                id="input-1"
+                v-model="config.serverName"
+                placeholder="server name"
+            ></b-form-input>
+        </b-form-group>
+        <!-- port -->
+        <b-form-group
+          id="input-group-2"
+          label="Port:"
+          label-for="input-2"
+          label-class="font-weight-bold"
+          :description="config.port_comment"
+        >
+            <b-form-input
+                id="input-2"
+                v-model="config.port"
+                placeholder="port"
+            ></b-form-input>
+        </b-form-group>
+        <!-- username -->
+        <b-form-group
+          id="input-group-3"
+          label="Username:"
+          label-for="input-3"
+          label-class="font-weight-bold"
+          :description="config.username_comment"
+        >
+            <b-form-input
+                id="input-3"
+                v-model="config.username"
+                placeholder="username"
+            ></b-form-input>
+        </b-form-group>
+        <!-- password -->
+        <b-form-group
+          id="input-group-4"
+          label="Password:"
+          label-for="input-4"
+          label-class="font-weight-bold"
+          :description="config.password_comment"
+        >
+            <b-form-input
+                id="input-4"
+                v-model="config.password"
+                placeholder="password"
+            ></b-form-input>
+        </b-form-group>
+        <!-- egine name -->
+        <b-form-group
+          id="input-group-5"
+          label="Engine Name:"
+          label-for="input-5"
+          label-class="font-weight-bold"
+          :description="config.engineName_comment"
+        >
+            <b-form-input
+                id="input-5"
+                v-model="config.engineName"
+                placeholder="engineName"
+            ></b-form-input>
+        </b-form-group>
+
+        <h2>Tables</h2>
+        <hr>
+        <!-- database name -->
+        <b-form-group
+          id="input-group-6"
+          label="Database Name:"
+          label-for="input-6"
+          label-class="font-weight-bold"
+          :description="config.databaseName_comment"
+        >
+            <b-form-input
+                id="input-6"
+                v-model="config.databaseName"
+                placeholder="databaseName"
+            ></b-form-input>
+        </b-form-group>
+        <!-- table list -->
+        <b-form-group
+          id="input-group-12"
+          label="Table List:"
+          :description="config.tableList_comment"
+          label-class="font-weight-bold"
+        >
+            <div 
+                v-for="(table, index) in config.tableList"
+                :key="index">
+                <b-badge>{{index+1}}</b-badge>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Schema Name">
+                    <b-form-input size="sm" v-model="config.tableList[index].schemaName"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Table Name">
+                    <b-form-input size="sm" v-model="config.tableList[index].tableName"></b-form-input>
+                </b-form-group>
+                <b-button variant="danger" @click="deleteTableRow(index)" size="sm">Remove</b-button>
+                <hr>
+            </div>
+            <b-button variant="outline-primary" @click="addTableRow" size="sm">Add</b-button>
+        </b-form-group>
+
+        <h2>Subscription</h2>
+        <hr>
+        <!-- email subscription -->
+        <b-form-group
+            label="Email Subscriptions:"
+            label-class="font-weight-bold"
+            :description="config.emailSubscriptionList_comment">
+            <div
+                v-for="(email, index) in config.emailSubscriptionList"
+                :key="index"
+                style="margin-left: 60px;">
+                <b-badge>email {{index+1}}</b-badge>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Email">
+                    <b-form-input
+                        size="sm"
+                        v-model="config.emailSubscriptionList[index]"
+                        style="margin-bottom: 5px;"
+                        type="email"
+                    ></b-form-input>
+                </b-form-group>
+                <b-button variant="danger" @click="deleteEmailRow(index)" size="sm">Remove</b-button>
+                <hr>
+            </div>
+            <b-button variant="outline-primary" @click="addEmailRow" size="sm">Add</b-button>
+        </b-form-group>
+        <!-- sms subscription -->
+        <b-form-group
+            label="SMS Subscriptions:"
+            label-class="font-weight-bold"
+            :description="config.smsSubscriptionList_comment">
+            <div
+                v-for="(sms, index) in config.smsSubscriptionList"
+                :key="index"
+                style="margin-left: 60px;">
+                <b-badge>phone {{index+1}}</b-badge>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Phone Number" >
+                    <b-form-input
+                        size="sm"
+                        v-model="config.smsSubscriptionList[index]"
+                        style="margin-bottom: 5px;"
+                    ></b-form-input>
+                </b-form-group>
+                <b-button variant="danger" @click="deleteSMSRow(index)" size="sm">Remove</b-button>
+                <hr>
+            </div>
+            <b-button variant="outline-primary" @click="addSMSRow" size="sm">Add</b-button>
+        </b-form-group>
+
+        <h2>Others</h2>
+        <hr>
+        <!-- VPC -->
+        <b-form-group
+          id="input-group-7"
+          label="VPC:"
+          label-class="font-weight-bold"
+          label-for="input-7"
+          :description="config.vpc_comment"
+        >
+            <b-form-input
+                id="input-7"
+                v-model="config.vpc"
+                placeholder="vpc"
+            ></b-form-input>
+        </b-form-group>
+        <!-- executive arn -->
+        <b-form-group
+          id="input-group-8"
+          label="Executive Arn:"
+          label-for="input-8"
+          label-class="font-weight-bold"
+          :description="config.executiveArn_comment"
+        >
+            <b-form-input
+                id="input-8"
+                v-model="config.executiveArn"
+                placeholder="executiveArn"
+            ></b-form-input>
+        </b-form-group>
+        <!-- s3LifecycleRule -->
+        <b-form-group
+          id="input-group-11"
+          label="S3 Lifecycle Rule:"
+          label-for="input-11"
+          label-class="font-weight-bold"
+          :description="config.s3LifecycleRule_comment"
+        >
+            <div 
+                v-for="(rule, index) in config.s3LifecycleRule"
+                :key="index">
+                <b-badge>rule {{index+1}}</b-badge>
+                <b-form-checkbox
+                        v-model="config.s3LifecycleRule[index].enabled"
+                        switch
+                >
+                enabled
+                </b-form-checkbox>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Expiration">
+                    <b-form-input size="sm" v-model="config.s3LifecycleRule[index].expiration"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Prefix">
+                    <b-form-input size="sm" v-model="config.s3LifecycleRule[index].prefix"></b-form-input>
+                </b-form-group>
+                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="AbortIncompleteMultipartUploadAfter">
+                    <b-form-input size="sm" v-model="config.s3LifecycleRule[index].abortIncompleteMultipartUploadAfter"></b-form-input>
+                </b-form-group>
+                <hr>
+            </div>
+            <b-button variant="outline-primary" @click="adds3LifecycleRuleRow" size="sm">Add</b-button>
+        </b-form-group>
+
+        <b-button variant="primary" type="submit">Update Configuration</b-button>
+        <b-button type="reset" variant="danger">Reset</b-button>
+        </b-form>
+    </div>
+    
+</div>
+</body>
+
+<script type="text/javascript" src="./FileReader.min.js" charset="utf-8"></script>
+<script type="text/javascript" src="../config/config.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: function () {
+            return {
+                config: {
+                }
+            }
+        },
+        methods: {
+            onSubmit() {
+                var content = JSON.stringify(this.config);
+                var blob = new Blob([content], {type: "application/json;charset=utf-8"});
+                saveAs(blob, "config.json");
+            },
+            onReset() {
+                this.config.emailSubscriptionList = [];
+                this.config.smsSubscriptionList = [];
+                this.config.s3LifecycleRule = [];
+                this.config.tableList = [];
+            },
+            addEmailRow() {
+                this.config.emailSubscriptionList.push('');
+            },
+            deleteEmailRow(index) {
+                this.config.emailSubscriptionList.splice(index, 1);
+            },
+            addSMSRow() {
+                this.config.smsSubscriptionList.push('');
+            },
+            deleteSMSRow(index) {
+                this.config.smsSubscriptionList.splice(index, 1);
+            },
+            adds3LifecycleRuleRow() {
+                this.config.s3LifecycleRule.push({
+                    "enabled": false,
+                    "expiration": 10,
+                    "prefix": "prefix_",
+                    "abortIncompleteMultipartUploadAfter": 3
+                });
+            },
+            deleteS3LifecycleRuleRow(index) {
+                this.config.s3LifecycleRule.splice(index, 1);
+            },
+            addTableRow() {
+                this.config.tableList.push({
+                    "schemaName": "",
+                    "tableName": ""
+                })
+            },
+            deleteTableRow(index) {
+                this.config.tableList.splice(index, 1);
+            }
+        },
+        mounted() {
+            // console.log(config_js);
+            this.config = config_js;
+        }
+    })
+</script>
+
+<style>
+    body {
+        background-color: rgb(240, 240, 240);
+    }
+    .navbar {
+        padding-top: 10px;
+    }
+
+</style>
+        

@@ -99,15 +99,15 @@ export class DMS extends Construct {
     private getMappingRule(): Object {
         const config = require('../config/config.json');
         var mappingRules: { rules: object[] } = { rules: [] };
-        for (let i =0; i<config.table_list.length; i++) {
+        for (let i =0; i<config.tableList.length; i++) {
             let rule: object = 
             {
                 "rule-type": "selection",
                 "rule-id": i,
                 "rule-name": i,
                 "object-locator": {
-                    "schema-name": config.table_list[i].schemaName,
-                    "table-name": config.table_list[i].tableName
+                    "schema-name": config.tableList[i].schemaName,
+                    "table-name": config.tableList[i].tableName
                 },
                 "rule-action": "include",
                 "filters": []

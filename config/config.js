@@ -1,4 +1,4 @@
-{
+const config_js = {
     "vpc": "10.0.0.0/17",
     "vpc_comment": "cidr for the vpc. E.G. 10.0.0.0/17",
     "serverName": "139.180.221.11",
