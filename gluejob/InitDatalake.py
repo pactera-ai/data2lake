@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class InitialLoad():
-    def __init__(self):
-        self.prefix = args['prefix']
+    def __init__(self, prefix):
+        self.prefix = prefix
         self.bucket = args['bucket']
         self.datalake_bucket = args['datalake_bucket']
         self.datalake_prefix = args['datalake_prefix']
@@ -56,7 +56,7 @@ class InitialLoad():
 
     def load_initial_file(self, folder, partitionKey, primaryKey, needIndexFile):
         s3_inputpath = 's3://' + self.bucket + '/' + self.prefix + folder
-        s3_data_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + folder
+        s3_data_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + self.prefix + folder
 
         input = spark.read.parquet(s3_inputpath+"/LOAD*.parquet").withColumn("Op", lit("I"))
 
@@ -148,6 +148,7 @@ class InitialLoad():
                         Key={"path": {"S":path}},
                         AttributeUpdates={"LastFullLoadDate": {"Value": {"S": lastFullLoadDate}}})
 
-load = InitialLoad()
-load.start_load()
+for prefix in eval(args['prefix']):
+    load = InitialLoad(prefix['schemaName'] + '/')
+    load.start_load()
 

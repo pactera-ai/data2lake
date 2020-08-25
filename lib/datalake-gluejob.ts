@@ -10,7 +10,7 @@ import * as path from 'path';
 
 export interface GlueJobProps {
     rawBucket: Bucket;
-    schemaName: string;
+    schemaList: string;
     dependsOn?: CfnResource;
 }
 export class GlueJob extends Construct {
@@ -75,7 +75,7 @@ export class GlueJob extends Construct {
             },
             glueVersion: '1.0',
             defaultArguments: {
-                '--prefix': props.schemaName + '/',
+                '--prefix': props.schemaList,
                 '--bucket': props.rawBucket.bucketName,
                 '--datalake_bucket': datalakeBucket.bucketName,
                 '--datalake_prefix': 'datalake/',
@@ -101,7 +101,7 @@ export class GlueJob extends Construct {
             },
             glueVersion: '1.0',
             defaultArguments: {
-                '--prefix': props.schemaName + '/',
+                '--prefix': props.schemaList,
                 '--bucket': props.rawBucket.bucketName,
                 '--datalake_bucket': datalakeBucket.bucketName,
                 '--datalake_prefix': 'datalake/',

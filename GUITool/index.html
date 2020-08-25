@@ -268,6 +268,7 @@
 
         <b-button variant="primary" type="submit">Update Configuration</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
+        <b-button variant="success" @click="deploy">Deploy</b-button>
         </b-form>
     </div>
     
@@ -275,7 +276,7 @@
 </body>
 
 <script type="text/javascript" src="./FileReader.min.js" charset="utf-8"></script>
-<script type="text/javascript" src="../config/config.js"></script>
+<script type="text/javascript" src="./config.js"></script>
 <script>
     new Vue({
         el: '#app',

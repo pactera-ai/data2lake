@@ -42,8 +42,8 @@ job.init(args['JOB_NAME'], args)
 
 
 class LoadIncremental():
-    def __init__(self):
-        self.prefix = args['prefix']
+    def __init__(self, prefix):
+        self.prefix = prefix
         self.bucket = args['bucket']
         self.datalake_bucket = args['datalake_bucket']
         self.datalake_prefix = args['datalake_prefix']
@@ -135,7 +135,7 @@ class LoadIncremental():
     def convert_partitions_to_paths(self, all_partitions, folder, partitionKeys):
         target_paths = []
         for p in all_partitions:
-            f = 's3://{}/{}{}'.format(self.datalake_bucket, self.datalake_prefix, folder)
+            f = 's3://{}/{}{}{}'.format(self.datalake_bucket, self.datalake_prefix, self.prefix, folder)
             partition_part = ''
             for k in partitionKeys:
                 partition_part = '{}{}={}/'.format(partition_part, k, p[k])
@@ -187,7 +187,7 @@ class LoadIncremental():
         target_file_paths = self.convert_partitions_to_paths(all_partitions, folder, partitionKeys)
         target_paths = self.existing_datalake_paths(target_file_paths)
 
-        base_path = 's3://{}/{}{}'.format(self.datalake_bucket, self.datalake_prefix, folder)
+        base_path = 's3://{}/{}{}{}'.format(self.datalake_bucket, self.datalake_prefix, self.prefix, folder)
         if len(target_paths) > 0:
             target = spark.read.option("basePath",base_path).option("mergeSchema", "true").parquet(*target_paths).withColumn("sortpath", lit("0")).withColumn("filepath",input_file_name()).withColumn("rownum", lit(0))
             target.cache()
@@ -210,7 +210,7 @@ class LoadIncremental():
 
     # Data has primary key, but it's not partitioned
     def get_output_no_partition(self, inputfile, folder, primaryKey):
-        s3_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + folder
+        s3_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + self.prefix + folder
 
         primaryKeys = primaryKey.split(",")
         if self.has_updated_at(inputfile): 
@@ -261,7 +261,7 @@ class LoadIncremental():
         
 
     def load_incremental_file(self, folder, updated_file_paths, primaryKey, partitionKey, needIndexFile):
-        s3_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + folder
+        s3_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + self.prefix + folder
 
         input_df = glueContext.create_dynamic_frame_from_options("s3", {'paths': updated_file_paths,  'groupFiles': 'inPartition' }, format="parquet")
         inputfile = input_df.toDF()
@@ -392,8 +392,9 @@ class LoadIncremental():
                     Key={"path": {"S":path}},
                     AttributeUpdates={"LastIncrementalFile": {"Value": {"S": newIncrementalFile}}})
 
-load = LoadIncremental()
-load.start()
+for prefix in eval(args['prefix']):
+    load = LoadIncremental(prefix['schemaName'] + '/')
+    load.start()
 glue_client = boto3.client('glue', args['region'])
 glue_client.start_crawler(Name=args['crawler_name'])
 
