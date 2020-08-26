@@ -1,49 +1,21 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta property="og:title" content="title">
-    <meta property="og:image" content="image">
-    <meta property="og:url" content="url">
-    <meta property="og:type" content="article">
-    <meta property="og:description" content="description">
-    <link rel="icon" href="">
-    <!-- Add this to <head> -->
-    <!-- Load required Bootstrap and BootstrapVue CSS -->
-    <link type="text/css" rel="stylesheet" href="http://unpkg.com/bootstrap/dist/css/bootstrap.min.css" />
-    <link type="text/css" rel="stylesheet" href="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.css" />
-
-    <!-- Load polyfills to support older browsers -->
-    <script src="http://polyfill.io/v3/polyfill.min.js?features=es2015%2CIntersectionObserver" crossorigin="anonymous"></script>
-
-    <!-- Load Vue followed by BootstrapVue -->
-    <script src="http://unpkg.com/vue@latest/dist/vue.min.js"></script>
-    <script src="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue.min.js"></script>
-
-    <!-- Load the following for BootstrapVueIcons support -->
-    <script src="http://unpkg.com/bootstrap-vue@latest/dist/bootstrap-vue-icons.min.js"></script>
-
-    <title>Data2Lake</title>
-</head>
-<body>
-<div id="app">
-    <b-navbar toggleable="lg" type="dark" variant="info" sticky=true>
+<template>
+  <div>
+    <b-navbar toggleable="lg" type="dark" variant="info">
         <b-navbar-brand href="#">Data2Lake</b-navbar-brand>
-      
+
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
-      
+
         <b-collapse id="nav-collapse" is-nav>
-        <b-navbar-nav>
+          <b-navbar-nav>
             <b-nav-item href="#">Data Connection</b-nav-item>
             <b-nav-item href="#">Tables</b-nav-item>
             <b-nav-item href="#">Subscriptions</b-nav-item>
             <b-nav-item href="#">Others</b-nav-item>
-        </b-navbar-nav>
+          </b-navbar-nav>
         </b-collapse>
     </b-navbar>
-    <div class="container" style="background-color: rgb(255, 255, 255); max-width: none; width: 90%; padding-bottom: 20px;">
-        <b-form @reset="onReset" @submit.prevent="onSubmit">
+    <b-container fluid="lg">
+      <b-form @reset="onReset" @submit.prevent="onSubmit">
         <h2 style=" padding-top: 20px">Database Connection</h2>
         <hr>
         <!-- server name -->
@@ -252,13 +224,13 @@
                 >
                 enabled
                 </b-form-checkbox>
-                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Expiration">
+                <b-form-group label-cols="5" label-cols-lg="3" label-size="sm" label="Expiration">
                     <b-form-input size="sm" v-model="config.s3LifecycleRule[index].expiration"></b-form-input>
                 </b-form-group>
-                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="Prefix">
+                <b-form-group label-cols="5" label-cols-lg="3" label-size="sm" label="Prefix">
                     <b-form-input size="sm" v-model="config.s3LifecycleRule[index].prefix"></b-form-input>
                 </b-form-group>
-                <b-form-group label-cols="4" label-cols-lg="2" label-size="sm" label="AbortIncompleteMultipartUploadAfter">
+                <b-form-group label-cols="5" label-cols-lg="3" label-size="sm" label="AbortIncompleteMultipartUploadAfter">
                     <b-form-input size="sm" v-model="config.s3LifecycleRule[index].abortIncompleteMultipartUploadAfter"></b-form-input>
                 </b-form-group>
                 <hr>
@@ -268,83 +240,84 @@
 
         <b-button variant="primary" type="submit">Update Configuration</b-button>
         <b-button type="reset" variant="danger">Reset</b-button>
-        <b-button variant="success" @click="deploy">Deploy</b-button>
         </b-form>
-    </div>
-    
-</div>
-</body>
+    </b-container>
+  </div>
+</template>
 
-<script type="text/javascript" src="./FileReader.min.js" charset="utf-8"></script>
-<script type="text/javascript" src="./config.js"></script>
 <script>
-    new Vue({
-        el: '#app',
-        data: function () {
-            return {
-                config: {
-                }
-            }
-        },
-        methods: {
-            onSubmit() {
-                var content = JSON.stringify(this.config);
-                var blob = new Blob([content], {type: "application/json;charset=utf-8"});
-                saveAs(blob, "config.json");
-            },
-            onReset() {
-                this.config.emailSubscriptionList = [];
-                this.config.smsSubscriptionList = [];
-                this.config.s3LifecycleRule = [];
-                this.config.tableList = [];
-            },
-            addEmailRow() {
-                this.config.emailSubscriptionList.push('');
-            },
-            deleteEmailRow(index) {
-                this.config.emailSubscriptionList.splice(index, 1);
-            },
-            addSMSRow() {
-                this.config.smsSubscriptionList.push('');
-            },
-            deleteSMSRow(index) {
-                this.config.smsSubscriptionList.splice(index, 1);
-            },
-            adds3LifecycleRuleRow() {
-                this.config.s3LifecycleRule.push({
-                    "enabled": false,
-                    "expiration": 10,
-                    "prefix": "prefix_",
-                    "abortIncompleteMultipartUploadAfter": 3
-                });
-            },
-            deleteS3LifecycleRuleRow(index) {
-                this.config.s3LifecycleRule.splice(index, 1);
-            },
-            addTableRow() {
-                this.config.tableList.push({
-                    "schemaName": "",
-                    "tableName": ""
-                })
-            },
-            deleteTableRow(index) {
-                this.config.tableList.splice(index, 1);
-            }
-        },
-        mounted() {
-            // console.log(config_js);
-            this.config = config_js;
-        }
+import axios from 'axios'
+
+export default {
+  name: 'Home',
+  props: {
+
+  },
+  data() {
+    return {
+      config: {},
+    };
+  },
+  methods: {
+    onSubmit() {
+      // var content = JSON.stringify(this.config);
+      // var blob = new Blob([content], {type: "application/json;charset=utf-8"});
+      // saveAs(blob, "config.json");
+    },
+    onReset() {
+      this.config.emailSubscriptionList = [];
+      this.config.smsSubscriptionList = [];
+      this.config.s3LifecycleRule = [];
+      this.config.tableList = [];
+    },
+    addEmailRow() {
+      this.config.emailSubscriptionList.push("");
+    },
+    deleteEmailRow(index) {
+      this.config.emailSubscriptionList.splice(index, 1);
+    },
+    addSMSRow() {
+      this.config.smsSubscriptionList.push("");
+    },
+    deleteSMSRow(index) {
+      this.config.smsSubscriptionList.splice(index, 1);
+    },
+    adds3LifecycleRuleRow() {
+      this.config.s3LifecycleRule.push({
+        enabled: false,
+        expiration: 10,
+        prefix: "prefix_",
+        abortIncompleteMultipartUploadAfter: 3,
+      });
+    },
+    deleteS3LifecycleRuleRow(index) {
+      this.config.s3LifecycleRule.splice(index, 1);
+    },
+    addTableRow() {
+      this.config.tableList.push({
+        schemaName: "",
+        tableName: "",
+      });
+    },
+    deleteTableRow(index) {
+      this.config.tableList.splice(index, 1);
+    },
+  },
+  mounted() { 
+    axios.get('config.json')
+    .then( res => {
+      this.config = res.data
     })
+  },
+};
 </script>
 
-<style>
-    body {
-        background-color: rgb(240, 240, 240);
-    }
-    .navbar {
-        padding-top: 10px;
-    }
-
+<!-- Add "scoped" attribute to limit CSS to this component only -->
+<style scoped>
+body {
+  background-color: rgb(240, 240, 240);
+}
+.navbar {
+  padding-top: 10px;
+}
 </style>
-        
