@@ -5,6 +5,8 @@ import { CfnCrawler, CfnJob, CfnTrigger } from "@aws-cdk/aws-glue";
 import * as iam from '@aws-cdk/aws-iam';
 import { ServicePrincipal, ManagedPolicy } from "@aws-cdk/aws-iam";
 import { Bucket } from "@aws-cdk/aws-s3";
+import { CfnPermissions } from '@aws-cdk/aws-lakeformation';
+import { MyPrinciple } from './MyPrinciple';
 import * as asset from '@aws-cdk/aws-s3-assets'
 import * as path from 'path';
 
@@ -13,6 +15,21 @@ export interface GlueJobProps {
     schemaList: string;
     dependsOn?: CfnResource;
 }
+
+class MyDatabaseResourceProperty implements CfnPermissions.DatabaseResourceProperty {
+    name?: string
+    constructor(scope: Construct, id: string, props: {name: string}) {
+        this.name = props.name;
+    }
+}
+
+class MyResourceProperty implements CfnPermissions.ResourceProperty {
+    databaseResource: CfnPermissions.DatabaseResourceProperty
+    constructor(scope: Construct, id: string, props: {name: string}) {
+        this.databaseResource = new MyDatabaseResourceProperty(scope, 'databaseProperty',{name: props.name})
+    }
+}
+
 export class GlueJob extends Construct {
     public readonly initialJobName: string = 'InitialDatalakeJob';
     public readonly incrementalJobName: string = 'IncrementalDatalakeJob';
@@ -40,6 +57,16 @@ export class GlueJob extends Construct {
         });
         props.rawBucket.grantRead(glueRole);
         datalakeBucket.grantReadWrite(glueRole);
+
+        new CfnPermissions(this, 'LakeFormationPermission', {
+            dataLakePrincipal: new MyPrinciple(this, 'LakeFormationPrinciple', {
+                dataLakePrincipalIdentifier: glueRole.roleArn
+            }),
+            resource:  new MyResourceProperty(this, 'resourceProperty', {
+                name: database.databaseName
+            }),
+            permissions: ['ALL']
+        })
         
         const crawler = new CfnCrawler(this, 'Crawler', {
             role: glueRole.roleArn,
