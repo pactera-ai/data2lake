@@ -42,8 +42,9 @@
         >
             <b-form-input
                 id="input-2"
-                v-model="config.port"
+                v-model.number="config.port"
                 placeholder="port"
+                type="number"
             ></b-form-input>
         </b-form-group>
         <!-- username -->
@@ -260,9 +261,14 @@ export default {
   },
   methods: {
     onSubmit() {
-      // var content = JSON.stringify(this.config);
-      // var blob = new Blob([content], {type: "application/json;charset=utf-8"});
-      // saveAs(blob, "config.json");
+      var content = JSON.stringify(this.config);
+      let uri = 'data:text/csv;charset=utf-8,\ufeff' + encodeURIComponent(content);
+      let link = document.createElement("a");
+      link.href = uri;
+      link.download =  "config.json";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     },
     onReset() {
       this.config.emailSubscriptionList = [];

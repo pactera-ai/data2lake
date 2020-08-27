@@ -6,7 +6,7 @@ import { Subscription } from './datalake-subscription';
 import { CfnDataLakeSettings } from '@aws-cdk/aws-lakeformation';
 import { MyPrinciple } from './MyPrinciple';
 
-const config = require("../config/config.json");
+const config = require("../GUITool/data2lake/public/config.json");
 
 export class DatalakeStack extends cdk.Stack {
   constructor(scope: cdk.App, id: string, props?: cdk.StackProps) {

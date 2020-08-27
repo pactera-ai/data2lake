@@ -97,7 +97,7 @@ export class DMS extends Construct {
     }
 
     private getMappingRule(): Object {
-        const config = require('../config/config.json');
+        const config = require('../GUITool/data2lake/public/config.json');
         var mappingRules: { rules: object[] } = { rules: [] };
         for (let i =0; i<config.tableList.length; i++) {
             let rule: object = 

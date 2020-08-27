@@ -1,4 +1,4 @@
-{
+﻿{
     "vpc": "10.0.0.0/17",
     "vpc_comment": "cidr for the vpc. E.G. 10.0.0.0/17",
     "serverName": "139.180.221.11",
@@ -30,12 +30,14 @@
         }
     ],
     "tableList_comment": "The data in the defined schema and table name would be transfered to data lake",
-    "s3LifecycleRule": [{
-        "enabled": true,
-        "expiration": 10,
-        "prefix": "prefix_",
-        "abortIncompleteMultipartUploadAfter": 3
-    }],
+    "s3LifecycleRule": [
+        {
+            "enabled": true,
+            "expiration": 10,
+            "prefix": "prefix_",
+            "abortIncompleteMultipartUploadAfter": 3
+        }
+    ],
     "s3LifecycleRule_comment": "Raw S3 bucket lifecycle rule. ",
     "emailSubscriptionList": [
         "steveguo1024@gmail.com",
