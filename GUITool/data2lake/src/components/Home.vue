@@ -1,47 +1,42 @@
 <template>
   <div>
-    <b-navbar toggleable="lg" type="dark" variant="info">
-        <b-navbar-brand href="#">Data2Lake</b-navbar-brand>
+    <b-navbar toggleable="lg" type="dark" variant="info" sticky="true">
+        <b-navbar-brand href="#top">Data2Lake</b-navbar-brand>
 
         <b-navbar-toggle target="nav-collapse"></b-navbar-toggle>
 
         <b-collapse id="nav-collapse" is-nav>
           <b-navbar-nav>
-            <b-nav-item href="#">Data Connection</b-nav-item>
-            <b-nav-item href="#">Tables</b-nav-item>
-            <b-nav-item href="#">Subscriptions</b-nav-item>
-            <b-nav-item href="#">Others</b-nav-item>
+            <b-nav-item href="#databaseConnection">Data Connection</b-nav-item>
+            <b-nav-item href="#tables">Tables</b-nav-item>
+            <b-nav-item href="#subscriptions">Subscriptions</b-nav-item>
+            <b-nav-item href="#others">Others</b-nav-item>
           </b-navbar-nav>
         </b-collapse>
     </b-navbar>
     <b-container fluid="lg">
+      <section id="databaseConnection"></section>
       <b-form @reset="onReset" @submit.prevent="onSubmit">
         <h2 style=" padding-top: 20px">Database Connection</h2>
         <hr>
         <!-- server name -->
         <b-form-group
-          id="input-group-1"
           label="Server Name:"
-          label-for="input-1"
           label-class="font-weight-bold"
           :description="config.serverName_comment"
         >
             <b-form-input
-                id="input-1"
                 v-model="config.serverName"
                 placeholder="server name"
             ></b-form-input>
         </b-form-group>
         <!-- port -->
         <b-form-group
-          id="input-group-2"
           label="Port:"
-          label-for="input-2"
           label-class="font-weight-bold"
           :description="config.port_comment"
         >
             <b-form-input
-                id="input-2"
                 v-model.number="config.port"
                 placeholder="port"
                 type="number"
@@ -49,66 +44,54 @@
         </b-form-group>
         <!-- username -->
         <b-form-group
-          id="input-group-3"
           label="Username:"
-          label-for="input-3"
           label-class="font-weight-bold"
           :description="config.username_comment"
         >
             <b-form-input
-                id="input-3"
                 v-model="config.username"
                 placeholder="username"
             ></b-form-input>
         </b-form-group>
         <!-- password -->
         <b-form-group
-          id="input-group-4"
           label="Password:"
-          label-for="input-4"
           label-class="font-weight-bold"
           :description="config.password_comment"
         >
             <b-form-input
-                id="input-4"
                 v-model="config.password"
                 placeholder="password"
             ></b-form-input>
         </b-form-group>
         <!-- egine name -->
         <b-form-group
-          id="input-group-5"
           label="Engine Name:"
-          label-for="input-5"
           label-class="font-weight-bold"
           :description="config.engineName_comment"
         >
             <b-form-input
-                id="input-5"
                 v-model="config.engineName"
                 placeholder="engineName"
             ></b-form-input>
         </b-form-group>
 
+        <section id="tables"></section>
         <h2>Tables</h2>
         <hr>
         <!-- database name -->
         <b-form-group
-          id="input-group-6"
           label="Database Name:"
-          label-for="input-6"
           label-class="font-weight-bold"
           :description="config.databaseName_comment"
         >
             <b-form-input
-                id="input-6"
                 v-model="config.databaseName"
                 placeholder="databaseName"
             ></b-form-input>
         </b-form-group>
         <!-- table list -->
         <b-form-group
-          id="input-group-12"
           label="Table List:"
           :description="config.tableList_comment"
           label-class="font-weight-bold"
@@ -129,6 +112,7 @@
             <b-button variant="outline-primary" @click="addTableRow" size="sm">Add</b-button>
         </b-form-group>
 
+        <section id="subscriptions"></section>
         <h2>Subscription</h2>
         <hr>
         <!-- email subscription -->
@@ -177,41 +161,34 @@
             <b-button variant="outline-primary" @click="addSMSRow" size="sm">Add</b-button>
         </b-form-group>
 
+        <section id="others"></section>
         <h2>Others</h2>
         <hr>
         <!-- VPC -->
         <b-form-group
-          id="input-group-7"
           label="VPC:"
           label-class="font-weight-bold"
-          label-for="input-7"
           :description="config.vpc_comment"
         >
             <b-form-input
-                id="input-7"
                 v-model="config.vpc"
                 placeholder="vpc"
             ></b-form-input>
         </b-form-group>
         <!-- executive arn -->
         <b-form-group
-          id="input-group-8"
           label="Executive Arn:"
-          label-for="input-8"
           label-class="font-weight-bold"
           :description="config.executiveArn_comment"
         >
             <b-form-input
-                id="input-8"
                 v-model="config.executiveArn"
                 placeholder="executiveArn"
             ></b-form-input>
         </b-form-group>
         <!-- s3LifecycleRule -->
         <b-form-group
-          id="input-group-11"
           label="S3 Lifecycle Rule:"
-          label-for="input-11"
           label-class="font-weight-bold"
           :description="config.s3LifecycleRule_comment"
         >
