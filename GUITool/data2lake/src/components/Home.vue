@@ -70,10 +70,7 @@
           label-class="font-weight-bold"
           :description="config.engineName_comment"
         >
-            <b-form-input
-                v-model="config.engineName"
-                placeholder="engineName"
-            ></b-form-input>
+            <b-form-select v-model="config.engineName" :options="options"></b-form-select>
         </b-form-group>
 
         <section id="tables"></section>
@@ -109,7 +106,8 @@
                 <b-button variant="danger" @click="deleteTableRow(index)" size="sm">Remove</b-button>
                 <hr>
             </div>
-            <b-button variant="outline-primary" @click="addTableRow" size="sm">Add</b-button>
+            <b-button variant="outline-primary" size="sm" @click="addTableRow">Add</b-button>
+            <b-button variant="outline-info" v-b-modal.tableSelect size="sm" style="margin-left:5px">DB Connector</b-button>
         </b-form-group>
 
         <section id="subscriptions"></section>
@@ -217,8 +215,32 @@
         </b-form-group>
 
         <b-button variant="primary" type="submit">Update Configuration</b-button>
-        <b-button type="reset" variant="danger">Reset</b-button>
+        <b-button type="reset" variant="danger" style="margin-left:5px">Reset</b-button>
         </b-form>
+        <b-modal id="tableSelect" title="Tables" @ok="doneRowSelected">
+          <b-button @click="connectDB" size="sm">Connect to Database</b-button>
+          <b-table
+            selectable
+            :select-mode="multi"
+            :items="tables"
+            :fields="fields"
+            @row-selected="onRowSelected"
+            sticky-header="true"
+            max-height="500px"
+            style="margin-top:5px"
+          >
+            <template v-slot:cell(selected)="{ rowSelected }">
+              <template v-if="rowSelected">
+                <span aria-hidden="true">&check;</span>
+                <span class="sr-only">Selected</span>
+              </template>
+              <template v-else>
+                <span aria-hidden="true">&nbsp;</span>
+                <span class="sr-only">Not selected</span>
+              </template>
+            </template>
+          </b-table>
+        </b-modal>
     </b-container>
   </div>
 </template>
@@ -234,6 +256,14 @@ export default {
   data() {
     return {
       config: {},
+      options: [
+        { value: 'mysql', text: 'mysql' },
+        { value: 'postgres', text: 'postgres' }
+      ],
+      connection: null,
+      tables: [],
+      selected: [],
+      fields: ['selected', 'schema', 'table'],
     };
   },
   methods: {
@@ -285,6 +315,31 @@ export default {
     deleteTableRow(index) {
       this.config.tableList.splice(index, 1);
     },
+    connectDB() {
+      let url = 'http://localhost:7788/tables/'+this.config.engineName+'/'
+        +this.config.serverName+'/'+this.config.port+'/'+this.config.username+'/'
+        +this.config.password+'/'+this.config.databaseName;
+      axios.get(url)
+      .then( res => {
+        this.tables = res.data;
+      })
+      .catch( err => {
+        console.log(err)
+      })
+    },
+    onRowSelected(items) {
+      this.selected = items;
+    },
+    doneRowSelected() {
+      console.log(this.selected, this.tables)
+      if (this.selected.length == this.tables.length && this.tables.length != 0) {
+        this.config.tableList = [{ "schemaName": this.tables[0].schema, "tableName": "%"}]
+        return;
+      }
+      this.config.tableList = this.selected.map( item => {
+        return { "schemaName": item.schema, "tableName": item.table }
+      })
+    }
   },
   mounted() { 
     axios.get('config.json')
