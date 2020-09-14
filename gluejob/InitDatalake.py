@@ -39,7 +39,8 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 class InitialLoad():
-    def __init__(self, prefix):
+    def __init__(self, prefix, schema):
+        self.schema = schema
         self.prefix = prefix
         self.bucket = args['bucket']
         self.datalake_bucket = args['datalake_bucket']
@@ -55,7 +56,7 @@ class InitialLoad():
         input_partitioned.select(primaryKey, *partitionKeys).coalesce(1).write.mode('overwrite').parquet(s3_index_path)
 
     def load_initial_file(self, folder, partitionKey, primaryKey, needIndexFile):
-        s3_inputpath = 's3://' + self.bucket + '/' + self.prefix + folder
+        s3_inputpath = 's3://' + self.bucket + '/' + self.schema + folder
         s3_data_outputpath = 's3://' + self.datalake_bucket + '/' + self.datalake_prefix + self.prefix + folder
 
         input = spark.read.parquet(s3_inputpath+"/LOAD*.parquet").withColumn("Op", lit("I"))
@@ -88,11 +89,11 @@ class InitialLoad():
         if not self.is_ddb_exist():
             logger.info(self.ddbTableName + ' does not exist, please setup dynamodb table')
             return
-        folders = self.s3conn.list_objects(Bucket=self.bucket, Prefix=self.prefix, Delimiter='/').get('CommonPrefixes')
+        folders = self.s3conn.list_objects(Bucket=self.bucket, Prefix=self.schema, Delimiter='/').get('CommonPrefixes')
         for f in folders:
             path = self.bucket + '/' + f['Prefix']
             full_folder = f['Prefix']
-            folder = full_folder[len(self.prefix):]
+            folder = full_folder[len(self.schema):]
 
             item = {
                 'path': {'S':path},
@@ -148,7 +149,9 @@ class InitialLoad():
                         Key={"path": {"S":path}},
                         AttributeUpdates={"LastFullLoadDate": {"Value": {"S": lastFullLoadDate}}})
 
-for prefix in eval(args['prefix']):
-    load = InitialLoad(prefix['schemaName'] + '/')
-    load.start_load()
+for connection in eval(args['prefix']):
+    prefix = connection['databaseName'] + '/'
+    for table in connection['tableList']:
+        load = InitialLoad(prefix + table['schemaName'] + '/', table['schemaName'] + '/')
+        load.start_load()
 

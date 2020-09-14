@@ -7,31 +7,22 @@ import { Vpc, SubnetType, SecurityGroup } from "@aws-cdk/aws-ec2";
 import { AwsCustomResource, AwsCustomResourcePolicy, PhysicalResourceId } from "@aws-cdk/custom-resources";
 
 export interface DmsProps {
-    source: SourceProps;
+    sources: any[];
     vpc: Vpc;
     s3LifecycleRule?: LifecycleRule[];
 } 
-export interface SourceProps {
-    port: number,
-    serverName: string,
-    username: string,
-    password: string,
-    engineName: string,
-    databaseName: string
-}
+// export interface SourceProps {
+//     port: number,
+//     serverName: string,
+//     username: string,
+//     password: string,
+//     engineName: string,
+//     databaseName: string
+// }
 export class DMS extends Construct {
     public readonly rawBucket: Bucket;
     constructor(scope: Construct, id: string, props: DmsProps) {
         super(scope, id);
-        const sourceEndpoint: CfnEndpoint = new CfnEndpoint(this, 'Source', {
-            endpointType: 'source',
-            engineName: props.source.engineName,
-            databaseName: props.source.databaseName,
-            password: props.source.password,
-            port: props.source.port,
-            serverName: props.source.serverName,
-            username: props.source.username
-        });
         this.rawBucket = new Bucket(this, 'RawBucket', {
             removalPolicy: RemovalPolicy.DESTROY,
             lifecycleRules: props.s3LifecycleRule
@@ -71,43 +62,58 @@ export class DMS extends Construct {
             replicationSubnetGroupIdentifier: subnetGroup.ref,
             vpcSecurityGroupIds: [dmsSecurityGroup.securityGroupId]
         });
-         
-        const replicationTask: CfnReplicationTask = new CfnReplicationTask(this, 'ReplicationTask', {
-            migrationType: 'full-load-and-cdc',
-            replicationInstanceArn: instance.ref,
-            sourceEndpointArn: sourceEndpoint.ref,
-            tableMappings: JSON.stringify(this.getMappingRule()),
-            targetEndpointArn: targetEndpoint.ref,
-            replicationTaskSettings: JSON.stringify(this.getTaskSetting())
-        });
 
-        new AwsCustomResource(this, 'StartTask', {
-            onCreate: {
-                service: 'DMS',
-                action: 'startReplicationTask',
-                parameters: {
-                    ReplicationTaskArn: replicationTask.ref,
-                    StartReplicationTaskType: "start-replication"
+        for ( let i=0; i< props.sources.length; i++) {
+            let source = props.sources[i];
+            const sourceEndpoint: CfnEndpoint = new CfnEndpoint(this, 'Source'+i, {
+                endpointType: 'source',
+                engineName: source.engineName,
+                databaseName: source.databaseName,
+                password: source.password,
+                port: source.port,
+                serverName: source.serverName,
+                username: source.username
+            });
+             
+            const replicationTask: CfnReplicationTask = new CfnReplicationTask(this, 'ReplicationTask'+i, {
+                migrationType: 'full-load-and-cdc',
+                replicationInstanceArn: instance.ref,
+                sourceEndpointArn: sourceEndpoint.ref,
+                tableMappings: JSON.stringify(this.getMappingRule(props.sources[i].tableList)),
+                targetEndpointArn: targetEndpoint.ref,
+                replicationTaskSettings: JSON.stringify(this.getTaskSetting())
+            });
+
+            new AwsCustomResource(this, 'StartTask'+i, {
+                onCreate: {
+                    service: 'DMS',
+                    action: 'startReplicationTask',
+                    parameters: {
+                        ReplicationTaskArn: replicationTask.ref,
+                        StartReplicationTaskType: "start-replication"
+                    },
+                    physicalResourceId: PhysicalResourceId.fromResponse('ReplicationTask.ReplicationTaskIdentifier'),
+                    outputPath: 'ReplicationTask.ReplicationTaskIdentifier'
                 },
-                physicalResourceId: PhysicalResourceId.fromResponse('ReplicationTask.ReplicationTaskIdentifier'),
-                outputPath: 'ReplicationTask.ReplicationTaskIdentifier'
-            },
-            policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE})
-        });
+                policy: AwsCustomResourcePolicy.fromSdkCalls({resources: AwsCustomResourcePolicy.ANY_RESOURCE})
+            });
+        }
+
+
+        
     }
 
-    private getMappingRule(): Object {
-        const config = require('../GUITool/data2lake/public/config.json');
+    private getMappingRule(tableList: any[]): Object {
         var mappingRules: { rules: object[] } = { rules: [] };
-        for (let i =0; i<config.tableList.length; i++) {
+        for (let i =0; i<tableList.length; i++) {
             let rule: object = 
             {
                 "rule-type": "selection",
                 "rule-id": i,
                 "rule-name": i,
                 "object-locator": {
-                    "schema-name": config.tableList[i].schemaName,
-                    "table-name": config.tableList[i].tableName
+                    "schema-name": tableList[i].schemaName,
+                    "table-name": tableList[i].tableName
                 },
                 "rule-action": "include",
                 "filters": []

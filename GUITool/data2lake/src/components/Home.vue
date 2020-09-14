@@ -72,10 +72,6 @@
         >
             <b-form-select v-model="config.engineName" :options="options"></b-form-select>
         </b-form-group>
-
-        <section id="tables"></section>
-        <h2>Tables</h2>
-        <hr>
         <!-- database name -->
         <b-form-group
           label="Database Name:"
@@ -87,6 +83,10 @@
                 placeholder="databaseName"
             ></b-form-input>
         </b-form-group>
+
+        <section id="tables"></section>
+        <h2>Tables</h2>
+        <hr>
         <!-- table list -->
         <b-form-group
           label="Table List:"

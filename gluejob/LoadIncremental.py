@@ -42,7 +42,8 @@ job.init(args['JOB_NAME'], args)
 
 
 class LoadIncremental():
-    def __init__(self, prefix):
+    def __init__(self, prefix, schema):
+        self.schema = schema
         self.prefix = prefix
         self.bucket = args['bucket']
         self.datalake_bucket = args['datalake_bucket']
@@ -318,13 +319,13 @@ class LoadIncremental():
 
     # Start to load incremental files
     def start(self):
-        folders = self.s3conn.list_objects(Bucket=self.bucket, Prefix=self.prefix, Delimiter='/').get('CommonPrefixes')
+        folders = self.s3conn.list_objects(Bucket=self.bucket, Prefix=self.schema, Delimiter='/').get('CommonPrefixes')
         self.prepare_ddb_table()
 
         for f in folders:
             full_folder = f['Prefix']
 
-            folder = full_folder[len(self.prefix):]
+            folder = full_folder[len(self.schema):]
             path = self.bucket + '/' + full_folder
 
             item = {
@@ -392,16 +393,21 @@ class LoadIncremental():
                     Key={"path": {"S":path}},
                     AttributeUpdates={"LastIncrementalFile": {"Value": {"S": newIncrementalFile}}})
 
-for prefix in eval(args['prefix']):
-    load = LoadIncremental(prefix['schemaName'] + '/')
-    load.start()
+#for prefix in eval(args['prefix']):
+#    load = LoadIncremental(prefix['schemaName'] + '/')
+#    load.start()
+#glue_client = boto3.client('glue', args['region'])
+#glue_client.start_crawler(Name=args['crawler_name'])
+
+
+
+for connection in eval(args['prefix']):
+    prefix = connection['databaseName'] + '/'
+    for table in connection['tableList']:
+        load = LoadIncremental(prefix + table['schemaName'] + '/', table['schemaName'] + '/')
+        load.start()
 glue_client = boto3.client('glue', args['region'])
 glue_client.start_crawler(Name=args['crawler_name'])
-
-
-
-
-
 
     
     

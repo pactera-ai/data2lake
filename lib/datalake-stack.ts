@@ -20,14 +20,7 @@ export class DatalakeStack extends cdk.Stack {
 
     const dms = new DMS(this, 'DmsPart', {
       vpc,
-      source: {
-        port: config.port,
-        username: config.username,
-        password: config.password,
-        serverName: config.serverName,
-        engineName: config.engineName,
-        databaseName: config.databaseName
-      },
+      sources: config.connections,
       s3LifecycleRule: parseLifecycleRule(config.s3LifecycleRule)
     });
 
@@ -40,7 +33,7 @@ export class DatalakeStack extends cdk.Stack {
     const rawBucket = dms.rawBucket;
     const glueJob = new GlueJob(this, 'DatalakeGlueJob', {
       rawBucket: rawBucket,
-      schemaList: JSON.stringify(config.tableList),
+      schemaList: JSON.stringify(config.connections),
       dependsOn: datalakeSettings
     });
 
