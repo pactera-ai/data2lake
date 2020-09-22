@@ -92,7 +92,7 @@ export class GlueJob extends Construct {
         incrementalJobScript.grantRead(glueRole);
         controllerTable.grantFullAccess(glueRole);
 
-        const config = require('../GUITool/data2lake/public/config.json');
+        const config = require('../config/config.json');
         const initGlueJob = new CfnJob(this, 'InitDatalakeJob', {
             name: this.initialJobName,
             role: glueRole.roleArn,
